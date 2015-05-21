@@ -54,18 +54,18 @@
 #define false 0
 #define true 1
 
-#define DEF_IP_ADDR           "localhost"   // instrument IP address or hostname ('localhost' for own PC)
-#define DEF_IP_PORT           2402          // TXP standard IP port number
-#define DEF_SLOT              2             // zero based slot number
-#define DEF_COMM_TIMEOUT      30000         // 10sec communication timeout
-#define DEF_BOOT_TIMEOUT      30000         // wait for card to finish booting (max 10sec)
-#define DEF_WAVELENGTH        1550      	// operating wavelength 1550.0nm
-#define BASIC_MEAS_SPEED      200.0         // measuremnet speed (2* motor speed) per second
-#define PERIODS_PER_BUFFER    2             // take 2 half revolutions per measuremnt buffer
-#define BUFFERS_PER_FFT       5             // take 10 buffers per transformation
-#define FFT_PER_RESULT        2             // average 2 transformations per result
-#define DEF_WRITE_TO_FILE	  0			    // write to file or not. 0 = false, 1 = true
-#define DEF_FILE_NAME           "output.txt"   // instrument IP address or hostname ('localhost' for own PC)
+#define DEF_IP_ADDR				"localhost"   // instrument IP address or hostname ('localhost' for own PC)
+#define DEF_IP_PORT				2402          // TXP standard IP port number
+#define DEF_SLOT				2             // zero based slot number
+#define DEF_COMM_TIMEOUT		30000         // 10sec communication timeout
+#define DEF_BOOT_TIMEOUT		30000         // wait for card to finish booting (max 10sec)
+#define DEF_WAVELENGTH			1550		  // operating wavelength 1550.0nm
+#define DEF_BASIC_MEAS_SPEED    200.0         // measuremnet speed (2* motor speed) per second
+#define DEF_PERIODS_PER_BUFFER  2             // take 2 half revolutions per measuremnt buffer
+#define DEF_BUFFERS_PER_FFT     5             // take 10 buffers per transformation
+#define DEF_FFT_PER_RESULT      2             // average 2 transformations per result
+#define DEF_WRITE_TO_FILE	    0			  // write to file or not. 0 = false, 1 = true
+#define DEF_FILE_NAME           "output.txt"  // instrument IP address or hostname ('localhost' for own PC)
 
 /*---------------------------------------------------------------------------
   Global Variables
@@ -78,7 +78,6 @@ FILE * pFile;
 ---------------------------------------------------------------------------*/
 
 
-//xxx
 void INThandler(int);
 void errorMessage(ViSession, ViStatus);
 void statusMessage(ViUInt32);
@@ -106,7 +105,11 @@ int main(int argc, char** argv)
 	unsigned int   comm_tmo = DEF_COMM_TIMEOUT;
 	unsigned int   boot_tmo = DEF_BOOT_TIMEOUT;
 	unsigned int   wavelength = DEF_WAVELENGTH;
-	
+	unsigned int   BASIC_MEAS_SPEED = DEF_BASIC_MEAS_SPEED;          // measuremnet speed (x* motor speed) per second
+	unsigned int   PERIODS_PER_BUFFER = DEF_PERIODS_PER_BUFFER;      // take x half revolutions per measuremnt buffer
+	unsigned int   BUFFERS_PER_FFT = DEF_BUFFERS_PER_FFT;            // take x buffers per transformation
+	unsigned int   FFT_PER_RESULT = DEF_FFT_PER_RESULT;              // average x transformations per result
+		
 	char           resName[80];   // buffer to build resource name
 	ViSession      instr;         // instruenmt handle
 	ViUInt32       stat;          // instrument status variable
@@ -123,8 +126,11 @@ int main(int argc, char** argv)
 	if(argc > 6) boot_tmo = (unsigned int)atoi(argv[6]);
 	if(argc > 7 && strcmp(argv[7],"true") == 0) write_to_file = 1;
 	if(argc > 8) strncpy(file_name, argv[8], sizeof(file_name));
+	if(argc > 9) BASIC_MEAS_SPEED = (unsigned int)atoi(argv[9]);
+	if(argc > 10) PERIODS_PER_BUFFER = (unsigned int)atoi(argv[10]);
+	if(argc > 11) BUFFERS_PER_FFT = (unsigned int)atoi(argv[11]);
+	if(argc > 12) FFT_PER_RESULT = (unsigned int)atoi(argv[12]);	
 
-	//xxx
 	//initiate break handler
 	signal(SIGINT, INThandler);
 
@@ -253,7 +259,6 @@ int main(int argc, char** argv)
 }
 
 
-//xxx
 ///*---------------------------------------------------------------------------
 //  Break handler - verify if user want's to break - close output file if open
 //---------------------------------------------------------------------------*/
@@ -335,15 +340,19 @@ void waitKeypress(void)
 void usage(char* name)
 {
 	printf("\nUsage:\n");
-	printf("%s [IP-address		IP-port slot wavelength comm-tmo boot-tmo write-to-file file-name \n\n", name);
-	printf("  IP-address		IP address or hostname (default: " DEF_IP_ADDR ")\n");
-	printf("  IP-port			IP port number (default: %u)\n", DEF_IP_PORT);
-	printf("  slot				zero based slot number 0..63 (default: %u)\n", DEF_SLOT);
-	printf("  wavelength		wavelength [nm] (default: %u)\n", DEF_WAVELENGTH);
-	printf("  comm-tmo			communication timeout [ms] (default: %u)\n", DEF_COMM_TIMEOUT);
-	printf("  boot-tmo			card boot timeout [ms] (default: %u)\n", DEF_BOOT_TIMEOUT);
-	printf("  write-to-file		write output to file (default: %u)\n", DEF_WRITE_TO_FILE);
-//	printf("  file-name			filename for output (default: " DEF_FILE_NAME ")\n");
+	printf("%s [attributes - ordered as below] \n\n", name);
+	printf("  IP-address      IP address or hostname (default: " DEF_IP_ADDR ")\n\n");
+	printf("  IP-port         IP port number (default: %u)\n\n", DEF_IP_PORT);
+	printf("  slot            zero based slot number 0..63 (default: %u)\n\n", DEF_SLOT);
+	printf("  wavelength      wavelength [nm] (default: %u)\n\n", DEF_WAVELENGTH);
+	printf("  comm-tmo        communication timeout [ms] (default: %u)\n\n", DEF_COMM_TIMEOUT);
+	printf("  boot-tmo        card boot timeout [ms] (default: %u)\n\n", DEF_BOOT_TIMEOUT);
+	printf("  write-to-file   write output to file (default: %u)\n\n", DEF_WRITE_TO_FILE);
+	printf("  file-name       filename for output (default: " DEF_FILE_NAME ")\n\n");
+	printf("  Meas. speed     measuremnet speed ( X * motor speed ) per second (default: %u)\n\n", DEF_BASIC_MEAS_SPEED);
+	printf("  periods         number of measurements per buffer\n                  take X half revolutions per measurement buffer (default: %u)\n\n", DEF_PERIODS_PER_BUFFER);
+	printf("  buffers         buffers per FFT\n                  take X buffers per transformation (default: %u)\n\n", DEF_BUFFERS_PER_FFT);
+	printf("  FFT's           FFT's per result\n                  average X transformations per result (default: %u)\n\n", DEF_FFT_PER_RESULT);
 	printf("\n");
 }
 
