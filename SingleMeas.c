@@ -60,12 +60,12 @@
 #define DEF_COMM_TIMEOUT		30000         // 10sec communication timeout
 #define DEF_BOOT_TIMEOUT		30000         // wait for card to finish booting (max 10sec)
 #define DEF_WAVELENGTH			1550		  // operating wavelength 1550.0nm
+#define DEF_WRITE_TO_FILE	    0			  // write to file or not. 0 = false, 1 = true
+#define DEF_FILE_NAME           "output.txt"  // instrument IP address or hostname ('localhost' for own PC)
 #define DEF_BASIC_MEAS_SPEED    200.0         // measuremnet speed (2* motor speed) per second
 #define DEF_PERIODS_PER_BUFFER  2             // take 2 half revolutions per measuremnt buffer
 #define DEF_BUFFERS_PER_FFT     5             // take 10 buffers per transformation
 #define DEF_FFT_PER_RESULT      2             // average 2 transformations per result
-#define DEF_WRITE_TO_FILE	    0			  // write to file or not. 0 = false, 1 = true
-#define DEF_FILE_NAME           "output.txt"  // instrument IP address or hostname ('localhost' for own PC)
 
 /*---------------------------------------------------------------------------
   Global Variables
@@ -130,6 +130,9 @@ int main(int argc, char** argv)
 	if(argc > 10) PERIODS_PER_BUFFER = (unsigned int)atoi(argv[10]);
 	if(argc > 11) BUFFERS_PER_FFT = (unsigned int)atoi(argv[11]);
 	if(argc > 12) FFT_PER_RESULT = (unsigned int)atoi(argv[12]);	
+
+	//dissable buffer - for low latency 
+	setbuf(stdout, NULL);
 
 	//initiate break handler
 	signal(SIGINT, INThandler);
@@ -229,6 +232,10 @@ int main(int argc, char** argv)
 
 		//print to screen
 		if(!err) printf("%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.10lf\t%d\n", st1, st2, st3, azi, ell, dop, pow, ElapsedMilliseconds.QuadPart);
+
+		// Will now print everything in the stdout buffer - 
+		//fflush(stdout); 
+
 		//print to file
 		if(write_to_file)
 			if(!err) fprintf(pFile, "%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.5lf\t%.10lf\t%d\n", st1, st2, st3, azi, ell, dop, pow, ElapsedMilliseconds.QuadPart);
